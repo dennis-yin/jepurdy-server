@@ -77,6 +77,7 @@ const getRoundThreeTile = async () => {
 
 // TODO: DRY it up
 const getAllTiles = async () => {
+  console.log("getAllTiles");
   const roundOneCategories = await getCategories(ROUND_ONE);
   const roundOnePromises = roundOneCategories.map(async ({ category }) => {
     const tiles = await getTilesByCategory(category, ROUND_ONE);

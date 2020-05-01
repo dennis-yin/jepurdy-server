@@ -17,23 +17,21 @@ const {
   ROUND_TWO,
   ROUND_THREE,
   TILES_PER_ROUND,
-  NUM_PLAYERS,
 } = require("./constants");
 
 app.use(cors());
 app.use(router);
 
-const gameServer = async () => {
+const gameServer = () => {
   const lobbies = {};
   const players = [];
 
-  io.on("connection", async (socket) => {
+  io.on("connection", (socket) => {
     console.log("New connection --------");
 
-    const tiles = await getAllTiles(); // TODO: Fix unnecessary fetching
     let gameState;
 
-    socket.on("join", ({ username, lobby }, callback) => {
+    socket.on("join", async ({ username, lobby }, callback) => {
       console.log("Player joined");
       const { error, player } = addPlayer({
         players,
@@ -47,6 +45,8 @@ const gameServer = async () => {
       if (lobbies[lobby]) {
         lobbies[lobby].numPlayersInLobby++;
       } else {
+        const tiles = await getAllTiles(); // TODO: Fix unnecessary fetching
+
         lobbies[lobby] = {
           tiles: tiles,
           numPlayersInLobby: 1,
@@ -67,6 +67,7 @@ const gameServer = async () => {
       io.in(player.lobby).emit("playerData", playersInLobby);
 
       socket.emit("tileData", gameState.tiles.roundOne);
+      socket.emit("toggleLoading");
 
       callback();
     });

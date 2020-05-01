@@ -1,4 +1,4 @@
-const { db } = require("./config");
+const { pool } = require("./config");
 const { addViewedProperty } = require("./helpers");
 const {
   NUM_CATEGORIES,
@@ -10,18 +10,12 @@ const {
 } = require("./constants");
 
 const getCategory = async (round) => {
-  try {
-    const category = await db.query(
-      "SELECT * FROM (SELECT DISTINCT category FROM questions WHERE round = $1) AS categories ORDER BY random() LIMIT 1",
-      [round]
-    );
+  const category = await pool.query(
+    "SELECT * FROM (SELECT DISTINCT category FROM questions WHERE round = $1) AS categories ORDER BY random() LIMIT 1",
+    [round]
+  );
 
-    console.log("Got the category", category);
-    return category.rows[0];
-  } catch (err) {
-    console.log("Couldn't retrieve data");
-    throw err;
-  }
+  return category.rows[0];
 };
 
 const getCategories = async (round) => {
@@ -40,14 +34,14 @@ const getTilesByCategory = async (category, round) => {
   const values = round === ROUND_ONE ? ROUND_ONE_VALUES : ROUND_TWO_VALUES;
 
   const arrayOfPromises = values.map(async (value) => {
-    const tile = await db.query(
+    const tile = await pool.query(
       "SELECT * FROM questions WHERE category = $1 AND value = $2 AND round = $3 ORDER BY random() LIMIT 1",
       [category, value, round]
     );
 
     // If the tile is a Daily Double then its value is not likely to be one of the 'normal' values. This code block queries for a tile with the same category and round, but with an irregular value, and sets its value appropriately
     if (tile.rows.length === 0) {
-      const dailyDouble = await db.query(
+      const dailyDouble = await pool.query(
         "SELECT * FROM questions WHERE category = $1 AND value NOT IN ($2, $3, $4, $5, $6) AND round = $7 ORDER BY random() LIMIT 1",
         [category, ...values, round]
       );
@@ -67,7 +61,7 @@ const getTilesByCategory = async (category, round) => {
 };
 
 const getRoundThreeTile = async () => {
-  const tile = await db.query(
+  const tile = await pool.query(
     "SELECT * FROM QUESTIONS WHERE round = $1 ORDER BY RANDOM() LIMIT 1",
     [ROUND_THREE]
   );
@@ -77,7 +71,6 @@ const getRoundThreeTile = async () => {
 
 // TODO: DRY it up
 const getAllTiles = async () => {
-  console.log("getAllTiles");
   const roundOneCategories = await getCategories(ROUND_ONE);
   const roundOnePromises = roundOneCategories.map(async ({ category }) => {
     const tiles = await getTilesByCategory(category, ROUND_ONE);

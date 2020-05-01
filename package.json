@@ -11,7 +11,8 @@
     "socket.io": "^2.3.0"
   },
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "index.js",
+    "start:dev": "nodemon index.js"
   },
   "browserslist": {
     "production": [

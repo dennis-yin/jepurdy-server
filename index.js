@@ -45,6 +45,7 @@ const gameServer = () => {
       if (lobbies[lobby]) {
         lobbies[lobby].numPlayersInLobby++;
       } else {
+        console.log("Fetching tiles...")
         const tiles = await getAllTiles(); // TODO: Fix unnecessary fetching
         console.log(`Tiles: ${tiles}`)
 

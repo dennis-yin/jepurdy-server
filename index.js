@@ -45,20 +45,24 @@ const gameServer = () => {
       if (lobbies[lobby]) {
         lobbies[lobby].numPlayersInLobby++;
       } else {
-        console.log("Fetching tiles...")
-        const tiles = await getAllTiles(); // TODO: Fix unnecessary fetching
-        console.log(`Tiles: ${tiles}`)
+        try {
+          console.log("Fetching tiles...");
+          const tiles = await getAllTiles(); // TODO: Fix unnecessary fetching
+          console.log(`Tiles: ${tiles}`);
 
-        lobbies[lobby] = {
-          tiles: tiles,
-          numPlayersInLobby: 1,
-          round: ROUND_ONE,
-          playerToPick: player.id,
-          buzzes: { current: "", history: [] },
-          tilesLeftInRound: TILES_PER_ROUND,
-          wagers: [],
-          answeredRoundThree: [],
-        };
+          lobbies[lobby] = {
+            tiles: tiles,
+            numPlayersInLobby: 1,
+            round: ROUND_ONE,
+            playerToPick: player.id,
+            buzzes: { current: "", history: [] },
+            tilesLeftInRound: TILES_PER_ROUND,
+            wagers: [],
+            answeredRoundThree: [],
+          };
+        } catch (err) {
+          throw new Error(err);
+        }
       }
 
       socket.join(lobby);
@@ -69,9 +73,9 @@ const gameServer = () => {
       io.in(player.lobby).emit("playerData", playersInLobby);
 
       socket.emit("tileData", gameState.tiles.roundOne);
-      console.log("Emit tileData")
+      console.log("Emit tileData");
       socket.emit("toggleLoading");
-      console.log("Emit toggleLoading")
+      console.log("Emit toggleLoading");
 
       callback();
     });

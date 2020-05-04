@@ -46,6 +46,7 @@ const gameServer = () => {
         lobbies[lobby].numPlayersInLobby++;
       } else {
         const tiles = await getAllTiles(); // TODO: Fix unnecessary fetching
+        console.log(`Tiles: ${tiles}`)
 
         lobbies[lobby] = {
           tiles: tiles,
@@ -67,7 +68,9 @@ const gameServer = () => {
       io.in(player.lobby).emit("playerData", playersInLobby);
 
       socket.emit("tileData", gameState.tiles.roundOne);
+      console.log("Emit tileData")
       socket.emit("toggleLoading");
+      console.log("Emit toggleLoading")
 
       callback();
     });

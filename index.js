@@ -27,12 +27,9 @@ const gameServer = () => {
   const players = [];
 
   io.on("connection", (socket) => {
-    console.log("New connection --------");
-
     let gameState;
 
     socket.on("join", async ({ username, lobby }, callback) => {
-      console.log("Player joined");
       const { error, player } = addPlayer({
         players,
         id: socket.id,
@@ -46,9 +43,7 @@ const gameServer = () => {
         lobbies[lobby].numPlayersInLobby++;
       } else {
         try {
-          console.log("Fetching tiles...");
-          const tiles = await getAllTiles(); // TODO: Fix unnecessary fetching
-          console.log(`Tiles: ${tiles}`);
+          const tiles = await getAllTiles();
 
           lobbies[lobby] = {
             tiles: tiles,
@@ -73,9 +68,7 @@ const gameServer = () => {
       io.in(player.lobby).emit("playerData", playersInLobby);
 
       socket.emit("tileData", gameState.tiles.roundOne);
-      console.log("Emit tileData");
       socket.emit("toggleLoading");
-      console.log("Emit toggleLoading");
 
       callback();
     });
@@ -206,7 +199,6 @@ const gameServer = () => {
 
     socket.on("disconnect", () => {
       socket.removeAllListeners();
-      console.log("Player disconnected --------");
     });
   });
 };
